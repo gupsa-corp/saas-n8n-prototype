@@ -1,0 +1,48 @@
+volumes:
+  postgres-data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=n8n
+      - POSTGRES_PASSWORD=password
+
+  n8n-dev-light:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    container_name: n8n-dev-light
+    ports:
+      - '5678:5678'
+    volumes:
+      - .:/workspaces:cached # 전체 소스코드 매핑
+      - ./n8n_data:/home/node/.n8n
+    working_dir: /workspaces
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+    command: >
+      sh -c "
+        export NODE_OPTIONS='--max-old-space-size=6144' &&
+        pnpm install &&
+        pnpm build --filter='!@n8n/chat' &&
+        cd packages/cli && pnpm start
+      "
+    environment:
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_PASSWORD=password
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - NODE_OPTIONS=--max-old-space-size=6144
+    depends_on:
+      - postgres
