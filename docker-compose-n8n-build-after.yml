@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '4567:5432'  # 외부4567 → 내부5432 (PostgreSQL 기본 포트)
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U n8n -d n8n']
       interval: 10s
@@ -27,19 +27,19 @@ services:
     container_name: n8n
     restart: unless-stopped
     ports:
-      - '5678:5678'
+      - '6789:5678'  # 외부6789 → 내부5678 (n8n 기본 포트)
     environment:
       # Database
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_PORT=5432  # PostgreSQL 내부 포트는 항상 5432
       - DB_POSTGRESDB_DATABASE=n8n
       - DB_POSTGRESDB_USER=n8n
       - DB_POSTGRESDB_PASSWORD=n8n_password
 
       # n8n Configuration
       - N8N_HOST=0.0.0.0
-      - N8N_PORT=5678
+      - N8N_PORT=5678  # n8n 내부 포트는 항상 5678
       - N8N_PROTOCOL=http
       - NODE_ENV=production
 
