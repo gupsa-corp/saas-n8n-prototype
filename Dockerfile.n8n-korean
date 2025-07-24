@@ -1,0 +1,13 @@
+FROM n8nio/n8n:latest
+
+# 한국어 번역 파일 복사
+COPY packages/frontend/@n8n/i18n/src/locales/ko.json /usr/local/lib/node_modules/n8n/dist/static/locales/ko.json
+
+# 권한 설정
+USER root
+RUN chown node:node /usr/local/lib/node_modules/n8n/dist/static/locales/ko.json
+USER node
+
+# 기본 로케일을 한국어로 설정
+ENV N8N_DEFAULT_LOCALE=ko
+ENV GENERIC_TIMEZONE=Asia/Seoul
